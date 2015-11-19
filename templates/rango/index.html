@@ -53,6 +53,7 @@
 {% endblock %}
 
 {% block body_block %}
+    <h1>Total visit {{ visits }}</h1>
     {% for category in categories %}
         <li>
             <a href="{% url 'category'  category.slug %}">{{ category.name }}</a>

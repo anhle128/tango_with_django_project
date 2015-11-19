@@ -1,8 +1,11 @@
+# django
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
+# system
+from datetime import datetime
+# custom
 from rango.models import Category, Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 
@@ -10,10 +13,41 @@ from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 # Create your views here.
 
 def index(request):
-    # context_dict = {'boldmessage':'I am a super man'}
-    category_list = Category.objects.order_by('-views')
-    context_dict = {'categories': category_list}
-    return  render(request,'rango/index.html',context_dict)
+    category_list = Category.objects.all()
+    page_list = Page.objects.all()
+
+    context_dict ={'categories': category_list, 'pages': page_list}
+
+    visits = request.session.get('visit')
+
+    if not visits:
+        visits = 1
+    reset_last_visit_time = False
+
+    last_visit = request.session.get('last_visit')
+    print 'last_visit %s'%last_visit[:-7]
+    if last_visit:
+        last_visit_time = datetime.strptime(last_visit[:-7],"%Y-%m-%d %H:%M:%S")
+
+        if(datetime.now() - last_visit_time).seconds > 0:
+            # ...reassign the value of the cookie to +1 of what it was before
+            visits = visits + 1
+            # ...and update the last visit cookie, too
+        reset_last_visit_time = True
+
+    else:
+        # Coolie last_visit doesn't exist, so create it to the current date/time
+        reset_last_visit_time = True
+
+    if reset_last_visit_time:
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = visits
+
+    context_dict['visits'] = visits
+
+    response = render(request, 'rango/index.html', context_dict)
+
+    return response
 
 def about(request):
     return  HttpResponse("This is about page! <br/> <a href='/rango'>Index</a>")
@@ -100,7 +134,6 @@ def add_page(request,category_name_slug):
     return  render(request,'rango/add_page.html',context_dict)
 
 def register(request):
-
     # A boolean value for telling the template whether the registration was successful
     # Set to False initially. Code changes value to True when registration succeds
     registered = False
@@ -153,7 +186,6 @@ def register(request):
     # Render the template depending on the context
     context_dict = {'user_form':user_form,'profile_form':profile_form,'registered':registered}
     return render(request,'rango/register.html',context_dict)
-
 
 def user_login(request):
 
