@@ -185,7 +185,7 @@ def register(request):
 
     # Render the template depending on the context
     context_dict = {'user_form':user_form,'profile_form':profile_form,'registered':registered}
-    return render(request,'rango/register.html',context_dict)
+    return render(request, 'rango/../templates/registration/registration_form.html',context_dict)
 
 def user_login(request):
 
@@ -226,7 +226,7 @@ def user_login(request):
     else:
         # No context variables to pass to the template systen, hence the
         # blank dictionary object...
-        return render(request,'rango/login.html',{})
+        return render(request, 'rango/../templates/registration/login.html',{})
 
 # User the Login_required() decorator to ensure only those Logged in can access the view
 @login_required
